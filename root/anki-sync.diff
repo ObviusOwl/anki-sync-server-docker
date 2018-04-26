@@ -1,0 +1,27 @@
+diff --git a/ankiserverctl.py b/ankiserverctl.py
+index 47462f1..9307221 100755
+--- a/ankiserverctl.py
++++ b/ankiserverctl.py
+@@ -65,7 +65,8 @@ def stopsrv():
+ 
+ def adduser(username):
+     if username:
+-        password = getpass.getpass("Enter password for {}: ".format(username))
++        print("Enter password for {}: ".format(username))
++        password = sys.stdin.readline().rstrip()
+         salt = binascii.b2a_hex(os.urandom(8)).decode("utf-8")
+         hash = hashlib.sha256("{}{}{}".format(username, password, salt).encode("utf-8")).hexdigest()+salt
+ 
+diff --git a/setup.py b/setup.py
+index 259d90d..4358de3 100644
+--- a/setup.py
++++ b/setup.py
+@@ -17,7 +17,7 @@ setup(
+     name="AnkiServer",
+     version="2.0.6",
+     description="A personal Anki sync server (so you can sync against your own server rather than AnkiWeb)",
+-    long_description=open('README.rst').read(),
++    long_description="",
+     license='LICENSE.txt',
+     author="David Snopek",
+     author_email="dsnopek@gmail.com",

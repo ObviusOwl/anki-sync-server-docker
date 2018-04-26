@@ -1,0 +1,131 @@
+apiVersion: v1
+kind: Template
+metadata:
+  name: anki-sync-server-template
+labels:
+  template: anki-sync-server
+  app: anki-sync-server
+objects:
+- kind: DeploymentConfig
+  apiVersion: v1
+  metadata:
+    name: anki-sync-server
+    partof: anki-sync-server
+  spec:
+    template: 
+      metadata:
+        labels:
+          name: anki-sync-server
+          partof: anki-sync-server
+      spec:
+        containers:
+        - name: anki-sync-server
+          image: " "
+          env:
+          - name: ANKI_USER
+            valueFrom:
+              secretKeyRef:
+                name: anki-credentials
+                key: username
+          - name: ANKI_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: anki-credentials
+                key: password
+          ports:
+          - containerPort: 27701
+            protocol: TCP
+          volumeMounts:
+          - mountPath: "/data"
+            name: "datavol"
+        volumes:
+        - name: "datavol"
+          persistentVolumeClaim:
+            claimName: "anki-data-claim"
+    replicas: 1
+    triggers:
+      - type: ConfigChange
+      - type: ImageChange
+        imageChangeParams:
+          automatic: true
+          containerNames:
+            - anki-sync-server
+          from:
+            kind: ImageStreamTag
+            name: "${ANKI_SYNC_IMAGE_STREAM_TAG}"
+          lastTriggeredImage: ""
+    strategy: 
+      type: Recreate
+    paused: false 
+    revisionHistoryLimit: 2 
+    minReadySeconds: 0
+
+- kind: Service
+  apiVersion: v1
+  metadata:
+    name: anki-sync-server
+  spec:
+    selector:
+      name: anki-sync-server
+    ports:
+    - port: 27701
+      protocol: TCP
+      targetPort: 27701
+
+- kind: Route
+  apiVersion: v1
+  metadata:
+    name: anki-sync-server
+  spec:
+    host: "${APP_ROUTE_HOST}"
+    path: "${APP_ROUTE_PATH}"
+    to:
+      kind: Service
+      name: anki-sync-server
+
+- kind: PersistentVolumeClaim
+  apiVersion: v1
+  metadata:
+    name: anki-data-claim
+  spec:
+    accessModes:
+      - ReadWriteOnce
+    resources:
+      requests:
+        storage: "${APP_STORAGE_SIZE}"
+
+- kind: Secret
+  apiVersion: v1
+  metadata:
+    name: anki-credentials
+  stringData:
+    username: "${ANKI_USER}"
+    password: "${ANKI_PASSWORD}"
+
+parameters:
+- name: ANKI_SYNC_IMAGE_STREAM_TAG
+  description: Name of the ImageStreamTag to be used for the image.
+  displayName: Name of the docker image and tag
+  value: "anki-sync-server:latest"
+
+- name: APP_STORAGE_SIZE
+  description: Volume space available for data, e.g. 512Mi, 2Gi.
+  displayName: Volume size
+  required: true
+- name: APP_ROUTE_HOST
+  description: Hostname use for the router object
+  value: anki-sync-jojo.apps.lan.terhaak.de
+  required: true
+- name: APP_ROUTE_PATH
+  description: Path use for the router object
+  value: 
+  
+- name: ANKI_USER
+  description: Username for anki sync login
+  displayName: Anki username
+  required: true
+
+- name: ANKI_PASSWORD
+  description: Password for anki sync login
+  displayName: Anki password
+  required: true
