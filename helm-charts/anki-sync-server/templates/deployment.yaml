@@ -1,0 +1,59 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: {{ include "anki-sync-server.fullname" . }}
+  labels:
+    app: {{ include "anki-sync-server.name" . }}
+    chart: {{ include "anki-sync-server.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "anki-sync-server.name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "anki-sync-server.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: anki-sync-server
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+          - name: ANKI_USER
+            valueFrom:
+              secretKeyRef:
+                name: '{{ include "anki-sync-server.fullname" . }}-credentials'
+                key: "anki-username"
+          - name: ANKI_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: '{{ include "anki-sync-server.fullname" . }}-credentials'
+                key: "anki-password"
+          ports:
+            - name: http
+              containerPort: 27701
+              protocol: TCP
+          livenessProbe:
+            periodSeconds: 300
+            initialDelaySeconds: 30
+            httpGet:
+              path: /
+              port: http
+          volumeMounts:
+          - mountPath: "/data"
+            name: "anki-sync-server-data"
+
+      volumes:
+      - name: "anki-sync-server-data"
+        persistentVolumeClaim:
+          claimName: '{{ include "anki-sync-server.fullname" . }}-data'
+
+    {{- if .Values.securityContext }}
+      securityContext:
+{{ toYaml .Values.securityContext | indent 8 }}
+    {{- end }}
