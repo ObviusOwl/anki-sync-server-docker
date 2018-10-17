@@ -18,7 +18,6 @@ RUN sed -i '/# Packaged commands/,$d' /srv/anki-bundled/anki/sound.py
 
 FROM debian:9
 WORKDIR /srv
-VOLUME /data
 EXPOSE 27701
 
 RUN apt-get update && apt-get install -y --no-install-recommends\
@@ -46,4 +45,5 @@ RUN mkdir -p /data \
     && chmod +x /entrypoint.sh
 
 USER 1001
+VOLUME /data
 CMD /entrypoint.sh
