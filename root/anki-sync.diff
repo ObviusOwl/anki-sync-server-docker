@@ -1,19 +1,37 @@
 diff --git a/ankisyncctl.py b/ankisyncctl.py
-index bb98918..51482b3 100755
+index bb98918..9f3b6f8 100755
 --- a/ankisyncctl.py
 +++ b/ankisyncctl.py
+@@ -1,7 +1,6 @@
+ #!/usr/bin/env python
+ import os
+ import sys
+-import getpass
+ 
+ import ankisyncd.config
+ from ankisyncd.users import SqliteUserManager
+@@ -20,7 +19,8 @@ def usage():
+     print("  passwd <username>  - change password of a user")
+ 
+ def adduser(username):
+-    password = getpass.getpass("Enter password for {}: ".format(username))
++    print("Enter password for {}: ".format(username))
++    password = sys.stdin.readline().rstrip()
+ 
+     user_manager = SqliteUserManager(AUTHDBPATH, COLLECTIONPATH)
+     user_manager.add_user(username, password)
 @@ -48,7 +48,8 @@ def passwd(username):
          print("User {} doesn't exist".format(username))
          return
  
 -    password = getpass.getpass("Enter password for {}: ".format(username))
-+        print("Enter password for {}: ".format(username))
-+        password = sys.stdin.readline().rstrip()
++    print("Enter password for {}: ".format(username))
++    password = sys.stdin.readline().rstrip()
      try:
          user_manager.set_password_for_user(username, password)
      except ValueError as error:
 diff --git a/ankisyncd/sync_app.py b/ankisyncd/sync_app.py
-index 3b07420..86b0e2f 100644
+index 3b07420..58ea92c 100644
 --- a/ankisyncd/sync_app.py
 +++ b/ankisyncd/sync_app.py
 @@ -752,7 +752,7 @@ def make_app(global_conf, **local_conf):
