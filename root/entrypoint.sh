@@ -1,6 +1,8 @@
 #!/bin/bash
 
-export PYTHONPATH="/srv:/srv/anki-bundled"
+export LANG="en_US.UTF-8"  
+export LANGUAGE="en_US:en" 
+export LC_ALL="en_US.UTF-8"
 
 if [ -z "$ANKI_USER" ]; then
   echo "Please set the environment variable ANKI_USER"
@@ -12,6 +14,6 @@ if [ -z "$ANKI_PASSWORD" ]; then
   exit 1
 fi
 
-echo -e "$ANKI_PASSWORD\n" | /srv/ankiserverctl.py adduser "$ANKI_USER"
+echo -e "$ANKI_PASSWORD\n" | python3 /srv/ankisyncctl.py adduser "$ANKI_USER"
 
-/srv/ankiserverctl.py debug 2>&1 | grep -v -E "^INFO.*$"
+python3 -m ankisyncd
