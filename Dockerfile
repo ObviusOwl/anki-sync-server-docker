@@ -22,7 +22,6 @@ VOLUME /data
 EXPOSE 27701
 
 RUN apt-get update && apt-get install -y --no-install-recommends\
-        locales \
         python3 \
         python3-bs4 \
         python3-decorator \
@@ -34,10 +33,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends\
     && apt-get clean -y && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 RUN pip3 install send2trash
-
-# anki-desktop needs a UTF-8 locale
-RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
-    locale-gen
 
 # copy anki source
 COPY --from=builder /srv /srv
