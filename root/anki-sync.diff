@@ -21,7 +21,7 @@ index 3b07420..86b0e2f 100644
  
  def main():
 -    logging.basicConfig(level=logging.INFO)
-+    logging.basicConfig(level=logging.WARNING)
++    logging.basicConfig(level=logging.WARNING, stream=sys.stdout)
      from wsgiref.simple_server import make_server
      from ankisyncd.thread import shutdown
      import ankisyncd.config

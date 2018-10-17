@@ -16,4 +16,4 @@ fi
 
 echo -e "$ANKI_PASSWORD\n" | python3 /srv/ankisyncctl.py adduser "$ANKI_USER"
 
-python3 -m ankisyncd
+python3 -u -m ankisyncd
